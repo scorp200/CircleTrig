@@ -1,0 +1,141 @@
+<html>
+
+<head>
+    <title>Circle Trig</title>
+    <style>
+        canvas {
+            position: absolute;
+            top: 00;
+            bottom: 00, left: 00;
+            right: 00;
+        }
+    </style>
+    <script>
+        scale = 0;;
+        scaleFactor = 10;
+        graph = undefined;
+        window.onload = function() {
+            c = document.getElementById('canvas');
+            cc = c.getContext('2d');
+            cc.imageSmoothingEnabled = true;
+            window.addEventListener('resize', resizeCanvas, false);
+            resizeCanvas();
+            draw();
+        }
+
+        function draw() {
+            cc.fillStyle = 'white';
+            cc.fillRect(0, 0, c.width, c.height);
+            cc.fillStyle = 'black';
+            size = 0.3 * scale
+            cc.fillRect((5 + graph.width / 2) - size / 2, (5 + graph.height / 2) - size / 2, size, size);
+            cc.drawImage(graph, 5, 5);
+            drawHandle();
+        }
+
+        function drawHandle(){
+            
+        }
+
+        function drawGraph(lc, ls) {
+            padding = 50;
+            paddingstroke = 15;
+            paddingspace = 2.3;
+            cvs = document.createElement('canvas');
+            cvs.width = cvs.height = (lc * ls * scale + 1 + padding);
+            cvs2d = cvs.getContext('2d');
+            cvs2d.fillStyle = '#b6ccff';
+            roundRect(cvs2d, 0, 0, cvs.width, cvs.height, 25, true, false);
+            cvs2d.fillStyle = '#e9f0ff';
+            roundRect(cvs2d, paddingstroke / 2, paddingstroke / 2, cvs.width - paddingstroke, cvs.height - paddingstroke, 18, true, false);
+            cvs2d.fillStyle = 'white';
+            cvs2d.fillRect(paddingstroke * paddingspace / 2, paddingstroke * paddingspace / 2, cvs.width - paddingstroke * paddingspace, cvs.height - paddingstroke * paddingspace);
+            cvs2d.beginPath();
+            cvs2d.strokeStyle = '#e0e0e0';
+            cvs2d.lineWidth = 1;
+            for (x = 0; x <= lc; x++) {
+                lx = x * ls * scale;
+                cvs2d.moveTo(padding / 2 + lx, padding / 2)
+                cvs2d.lineTo(padding / 2 + lx, padding / 2 + lc * ls * scale);
+            }
+            for (x = 0; x <= lc; x++) {
+                ly = x * ls * scale;
+                cvs2d.moveTo(padding / 2, padding / 2 + ly)
+                cvs2d.lineTo(padding / 2 + lc * ls * scale, padding / 2 + ly);
+            }
+            cvs2d.stroke();
+            cvs2d.closePath();
+            cvs2d.beginPath();
+            cvs2d.strokeStyle = 'black';
+            cvs2d.lineWidth = 2;
+            cvs2d.arc(padding / 2 + lc * ls * scale / 2, padding / 2 + lc * ls * scale / 2, 12 * ls * scale, 0, Math.PI * 2, true);
+            cvs2d.stroke();
+            cvs2d.closePath();
+            return cvs;
+        }
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            scale = canvas.height / scaleFactor;
+            graph = drawGraph(32, 0.2);
+            draw();
+        }
+
+        function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
+            if (typeof stroke == 'undefined') {
+                stroke = true;
+            }
+            if (typeof radius === 'undefined') {
+                radius = 5;
+            }
+            if (typeof radius === 'number') {
+                radius = {
+                    tl: radius,
+                    tr: radius,
+                    br: radius,
+                    bl: radius
+                };
+            } else {
+                var defaultRadius = {
+                    tl: 0,
+                    tr: 0,
+                    br: 0,
+                    bl: 0
+                };
+                for (var side in defaultRadius) {
+                    radius[side] = radius[side] || defaultRadius[side];
+                }
+            }
+            ctx.beginPath();
+            ctx.moveTo(x + radius.tl, y);
+            ctx.lineTo(x + width - radius.tr, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius.tr);
+            ctx.lineTo(x + width, y + height - radius.br);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius.br, y + height);
+            ctx.lineTo(x + radius.bl, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius.bl);
+            ctx.lineTo(x, y + radius.tl);
+            ctx.quadraticCurveTo(x, y, x + radius.tl, y);
+            ctx.closePath();
+            if (fill) {
+                ctx.fill();
+            }
+            if (stroke) {
+                ctx.stroke();
+            }
+
+        }
+
+        function toEmDash(i) {
+            if (i < 0) {
+                return ("– " + Math.abs(i));
+            }
+            return i + "";
+        }
+    </script>
+
+</head>
+<canvas id="canvas"></canvas>
+
+</html>
