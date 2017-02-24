@@ -42,12 +42,13 @@
             y: 0
         };
         trigfunc = {
-          cos: 1,
-          sin: 0
+            cos: 1,
+            sin: 0
         };
         ballR = 0.1;
         snappadding = 2;
         total_radian = 0;
+        total_degrees = 0;
         linenumber = 26;
         linespacing = 0.24;
         cirlcesize = 10;
@@ -118,12 +119,8 @@
 
         function dragging() {
             rot = Math.atan2(mouse.y - center.y, mouse.x - center.x);
-            dot = Math.cos(anglez) * Math.cos(rot) + Math.sin(anglez) * Math.sin(rot);
-            perp = -Math.sin(anglez) * Math.cos(rot) + Math.cos(anglez) * Math.sin(rot);
-            anglez = rot;
             radian = -rot;
-            oldangle = angle;
-            angle = radian * (todegree);
+            angle = radian * todegree;
             if (angle < 90 + snappadding && angle > 90 - snappadding)
                 angle = 90;
             else if (angle < snappadding && angle > -snappadding)
@@ -132,10 +129,22 @@
                 angle = -90;
             else if (Math.abs(angle) < 180 + snappadding && Math.abs(angle) > 180 - snappadding)
                 angle = 180;
+            else if (angle < 45 + snappadding && angle > 45 - snappadding)
+                angle = 45;
+            else if (angle < snappadding && angle > -snappadding)
+                angle = 0;
+            else if (angle < -45 + snappadding && angle > -45 - snappadding)
+                angle = -45;
+            else if (angle < -135 + snappadding && angle > -135 - snappadding)
+                angle = -135;
+            else if (angle < 135 + snappadding && angle > 135 - snappadding)
+                angle = 135;
+            radian = -angle * toradian;
+            dot = Math.cos(anglez) * Math.cos(radian) + Math.sin(anglez) * Math.sin(radian);
+            perp = -Math.sin(anglez) * Math.cos(radian) + Math.cos(anglez) * Math.sin(radian);
+            anglez = radian;
             total_radian -= Math.acos(dot > 1 ? 1 : dot) * (perp >= 0 ? 1 : -1);
-            total_radian = total_radian.toFixed(2);
-            //console.log((angle * toradian).toFixed(2));
-            //draw();
+            total_degrees = total_radian * todegree;
         }
 
         function draw(time) {
@@ -151,15 +160,29 @@
             drawNumbers();
         }
 
-        function drawNumbers(){
-          fs = 0.25 * scale;
-          cc.fillStyle = '#B3E5FC';
-          cc.font = fs + 'px Arial black';
-          cc.textAlign = 'left';
-          cc.fillText('x = ' + trigfunc.cos.toFixed(2) ,infobar.px + fs * 1.3, infobar.py + padding + fs);
-          cc.textAlign = 'right';
-          cc.fillStyle = '#FFCDD2';
-          cc.fillText('y = ' + -trigfunc.sin.toFixed(2) ,infobar.px + fs * 10.9, infobar.py + padding + fs);
+        function drawNumbers() {
+            cos = toEmDash((Math.round(trigfunc.cos * 100) / 100).toFixed(2));
+            sin = toEmDash((Math.round(trigfunc.sin * 100) / -100).toFixed(2));
+            tdegree = toEmDash((Math.round(total_degrees * 100) / 100).toFixed(2));
+            trads = toEmDash((Math.round(total_radian * 100) / 100).toFixed(2));
+            fs = 0.25 * scale;
+            cc.fillStyle = '#B3E5FC';
+            cc.font = fs + 'px Arial black';
+            cc.textAlign = 'left';
+            cc.fillText('x = ' + cos, infobar.px + fs * 1.3, infobar.py + padding + fs);
+            cc.textAlign = 'right';
+            cc.fillStyle = '#FFCDD2';
+            cc.fillText('y = ' + sin, infobar.px + fs * 10.9, infobar.py + padding + fs);
+            cc.fillStyle = '#CCFF90';
+            cc.textAlign = 'left';
+            cc.fillText('Degrees Measure = ' + tdegree, infobar.px + fs * 1.3, infobar.py + padding + fs * 2.3);
+            cc.fillText('Radians Measure = ' + trads, infobar.px + fs * 1.3, infobar.py + padding + fs * 3.5);
+            cc.fillStyle = '#B3E5FC';
+            cc.fillText('cos( ' + tdegree + '° ) = ' + cos, infobar.px + fs * 1.3, infobar.py + padding + fs * 6.5);
+            cc.fillText('cos( ' + trads + ' ) = ' + cos, infobar.px + fs * 1.3, infobar.py + padding + fs * 7.7);
+            cc.fillStyle = '#FFCDD2';
+            cc.fillText('sin( ' + tdegree + '° ) = ' + sin, infobar.px + fs * 1.3, infobar.py + padding + fs * 9.1);
+            cc.fillText('sin( ' + trads + ' ) = ' + sin, infobar.px + fs * 1.3, infobar.py + padding + fs * 10.3);
         }
 
         function drawInfoBar() {
@@ -171,8 +194,8 @@
             fs = 0.3 * scale;
             cvs2d.font = fs + 'px Arial black';
             cvs2d.textAlign = 'left';
-            cvs2d.fillText('COORDINATES',graph.px + fs, graph.py + padding / 2 + fs);
-            cvs2d.fill();
+            cvs2d.fillText('COORDINATES', graph.px + fs, graph.py + padding / 2 + fs);
+            cvs2d.fillText('TRIGONOMETRIC FUNCTIONS', graph.px + fs, graph.py + padding * 2.5 + fs);
             image = new Image();
             image.src = cvs.toDataURL('image/png');
             if (canvas.width < canvas.height) {
@@ -195,10 +218,15 @@
             padd = linenumber * linespacing * scale;
             //cross line
             cc.beginPath();
-            cc.strokeStyle = 'rgba(118, 255, 3, 0.8)';
+            cc.strokeStyle = hex2rgba('#76FF03', 0.8);
+            //cc.strokeStyle = hex2rgba('#00B0FF', 0.5);
             cc.lineWidth = 3;
             cc.moveTo(point.x, graph.py + padding / 2);
             cc.lineTo(point.x, graph.py + padding / 2 + padd);
+            //cc.stroke();
+            //cc.closePath();
+            //cc.beginPath();
+            //cc.strokeStyle = hex2rgba('#FF1744', 0.5);
             cc.moveTo(graph.px + padding / 2, point.y);
             cc.lineTo(graph.px + padding / 2 + padd, point.y);
             cc.stroke();
@@ -363,6 +391,13 @@
                 return ("– " + Math.abs(i));
             }
             return i + "";
+        }
+
+        function hex2rgba(hexa, alpha) {
+            var r = parseInt(hexa.slice(1, 3), 16);
+            g = parseInt(hexa.slice(3, 5), 16);
+            b = parseInt(hexa.slice(5, 7), 16);
+            return 'rgba(' + r + ', ' + g + ', ' + b + ', ' + alpha + ')';
         }
     </script>
 
