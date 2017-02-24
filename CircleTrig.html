@@ -4,6 +4,9 @@
     <title>Circle Trig</title>
     <meta http-equiv="content-type" content="text/html; charset=UTF8">
     <meta name="viewport" content="user-scalable=no">
+
+    <body style="background-color:white;">
+    </body>
     <style>
         canvas {
             position: absolute;
@@ -20,7 +23,6 @@
         scale = 0;
         scaleFactor = 7.12;
         graph = undefined;
-        graphx = graphy = 0;
         angle = 0;
         anglez = 0;
         oldangle = 1;
@@ -39,14 +41,17 @@
             x: 0,
             y: 0
         };
+        trigfunc = {
+          cos: 1,
+          sin: 0
+        };
         ballR = 0.1;
         snappadding = 2;
         total_radian = 0;
-        linenumber = 32;
-        linespacing = 0.2;
+        linenumber = 26;
+        linespacing = 0.24;
+        cirlcesize = 10;
         padding = 90;
-        paddingstroke = 9;
-        paddingspace = 3;
         ismobile = false;
         linewidth = 2
         todegree = 180 / Math.PI;
@@ -54,6 +59,12 @@
         window.onload = function() {
             c = document.getElementById('canvas');
             c.addEventListener('mousemove', function(e) {
+                dragtolerance = ballR * 2;
+                if (e.clientX <= point.x + dragtolerance * scale && e.clientX >= point.x - dragtolerance * scale && e.clientY <= point.y + dragtolerance * scale && e.clientY >= point.y - dragtolerance * scale) {
+                    ballR = 0.11;
+                } else {
+                    ballR = 0.1;
+                }
                 mouse.x = e.clientX;
                 mouse.y = e.clientY;
             });
@@ -68,7 +79,7 @@
                 if (e.clientX <= point.x + dragtolerance * scale && e.clientX >= point.x - dragtolerance * scale && e.clientY <= point.y + dragtolerance * scale && e.clientY >= point.y - dragtolerance * scale) {
                     if (!isDragging) {
                         isDragging = true;
-                        drag = setInterval(dragging, 1000 / 60);
+                        //drag = setInterval(dragging, 1000 / 60);
                     }
                 }
             });
@@ -78,7 +89,7 @@
                 if (e.clientX <= point.x + dragtolerance * scale && e.clientX >= point.x - dragtolerance * scale && e.clientY <= point.y + dragtolerance * scale && e.clientY >= point.y - dragtolerance * scale) {
                     if (!isDragging) {
                         isDragging = true;
-                        drag = setInterval(dragging, 1000 / 60);
+                        //drag = setInterval(dragging, 1000 / 60);
                     }
                 }
                 return false;
@@ -87,14 +98,14 @@
                 if (e.touches) e = e.touches[0];
                 if (isDragging) {
                     isDragging = false;
-                    clearInterval(drag);
+                    //clearInterval(drag);
                 }
                 return false;
             }, false);
             c.addEventListener('mouseup', function(e) {
                 if (isDragging) {
                     isDragging = false;
-                    clearInterval(drag);
+                    //clearInterval(drag);
                 }
             });
             cc = c.getContext('2d');
@@ -124,20 +135,31 @@
             total_radian -= Math.acos(dot > 1 ? 1 : dot) * (perp >= 0 ? 1 : -1);
             total_radian = total_radian.toFixed(2);
             //console.log((angle * toradian).toFixed(2));
-            draw();
+            //draw();
         }
 
-        function draw() {
+        function draw(time) {
+            requestAnimationFrame(draw);
+            if (isDragging)
+                dragging();
             cc.fillStyle = '#b6ccff';
             cc.clearRect(0, 0, c.width, c.height);
-            cc.fillStyle = 'black';
             size = 0.3 * scale;
-            cc.drawImage(graph, graphx, graphy);
-            if (canvas.width > canvas.height)
-                cc.drawImage(infobar, graphx + graph.width, graphy);
-            else
-                cc.drawImage(infobar, graphx, graphy + graph.height);
+            cc.drawImage(graph, graph.px, graph.py);
+            cc.drawImage(infobar, infobar.px, infobar.py);
             drawHandle();
+            drawNumbers();
+        }
+
+        function drawNumbers(){
+          fs = 0.25 * scale;
+          cc.fillStyle = '#B3E5FC';
+          cc.font = fs + 'px Arial black';
+          cc.textAlign = 'left';
+          cc.fillText('x = ' + trigfunc.cos.toFixed(2) ,infobar.px + fs * 1.3, infobar.py + padding + fs);
+          cc.textAlign = 'right';
+          cc.fillStyle = '#FFCDD2';
+          cc.fillText('y = ' + -trigfunc.sin.toFixed(2) ,infobar.px + fs * 10.9, infobar.py + padding + fs);
         }
 
         function drawInfoBar() {
@@ -145,49 +167,58 @@
             cvs.width = graph.width;
             cvs.height = graph.height;
             cvs2d = cvs.getContext('2d');
-            cvs2d.fillStyle = '#b6ccff';
-            roundRect(cvs2d, padding * 0.8, padding / 2, graph.width - padding * 1.6, graph.height / 4, 20, true, false);
-            cvs2d.fillStyle = '#e9f0ff';
-            roundRect(cvs2d, padding * 0.9, padding * 0.6, graph.width - padding * 1.8, graph.height / 4.3, 15, true, false);
-            cvs2d.fillStyle = 'white';
-            cvs2d.beginPath();
-            cvs2d.fillRect(padding, padding * 0.7, graph.width - padding * 2, graph.height / 4.7);
+            cvs2d.fillStyle = '#29B6F6';
+            fs = 0.3 * scale;
+            cvs2d.font = fs + 'px Arial black';
+            cvs2d.textAlign = 'left';
+            cvs2d.fillText('COORDINATES',graph.px + fs, graph.py + padding / 2 + fs);
+            cvs2d.fill();
             image = new Image();
             image.src = cvs.toDataURL('image/png');
+            if (canvas.width < canvas.height) {
+                image.px = graph.px;
+                image.py = graph.py + graph.height;
+                console.log(image.py);
+            } else {
+                image.px = graph.px + graph.width;
+                image.py = graph.py;
+            }
             return image;
         }
 
         function drawHandle() {
-            angle = angle * toradian;
-            point.x = (12 * 0.2 * scale) * Math.cos(-angle) + (center.x)
-            point.y = (12 * 0.2 * scale) * Math.sin(-angle) + (center.y);
+            rads = angle * toradian;
+            trigfunc.cos = Math.cos(-rads);
+            trigfunc.sin = Math.sin(-rads);
+            point.x = (cirlcesize * linespacing * scale) * trigfunc.cos + (center.x)
+            point.y = (cirlcesize * linespacing * scale) * trigfunc.sin + (center.y);
             padd = linenumber * linespacing * scale;
             //cross line
             cc.beginPath();
-            cc.strokeStyle = 'rgba(155, 255, 208, 0.8)';
+            cc.strokeStyle = 'rgba(118, 255, 3, 0.8)';
             cc.lineWidth = 3;
-            cc.moveTo(point.x, graphy + padding / 2);
-            cc.lineTo(point.x, graphy + padding / 2 + padd);
-            cc.moveTo(graphx + padding / 2, point.y);
-            cc.lineTo(graphx + padding / 2 + padd, point.y);
+            cc.moveTo(point.x, graph.py + padding / 2);
+            cc.lineTo(point.x, graph.py + padding / 2 + padd);
+            cc.moveTo(graph.px + padding / 2, point.y);
+            cc.lineTo(graph.px + padding / 2 + padd, point.y);
             cc.stroke();
             cc.closePath();
             //cog
             cc.beginPath();
-            cc.strokeStyle = '#b6ccff';
-            cc.lineWidth = 2;
+            cc.strokeStyle = '#29B6F6';
+            cc.lineWidth = 3;
             cc.moveTo(center.x, center.y);
             cc.lineTo(point.x, point.y);
             cc.stroke();
             cc.closePath();
             //ball
             cc.beginPath();
-            cc.fillStyle = '#b6ccff';
+            cc.fillStyle = '#29B6F6';
             cc.arc(point.x, point.y, ballR * scale, Math.PI * 2, 0, true);
             cc.fill();
             cc.closePath();
             cc.beginPath();
-            cc.fillStyle = '#e9f0ff';
+            cc.fillStyle = '#B3E5FC';
             cc.arc(point.x, point.y, ballR * scale * 0.65, Math.PI * 2, 0, true);
             cc.fill();
             cc.closePath();
@@ -197,20 +228,10 @@
             cvs = document.createElement('canvas');
             cvs.width = cvs.height = (lc * ls * scale + 1 + padding);
             cvs2d = cvs.getContext('2d');
-            /*cvs2d.fillStyle = '#b6ccff';
-            roundRect(cvs2d, 0, 0, cvs.width, cvs.height, 25, true, false);
-            cvs2d.fillStyle = '#e9f0ff';
-            roundRect(cvs2d, paddingstroke / 2, paddingstroke / 2, cvs.width - paddingstroke, cvs.height - paddingstroke, 18, true, false);
-            cvs2d.fillStyle = 'white';
-            cvs2d.fillRect(paddingstroke * paddingspace / 2, paddingstroke * paddingspace / 2, cvs.width - paddingstroke * paddingspace, cvs.height - paddingstroke * paddingspace);*/
             cvs2d.beginPath();
-            cvs2d.strokeStyle = '#e0e0e0';
+            cvs2d.strokeStyle = '#CFD8DC';
             cvs2d.lineWidth = 1;
-            cvs2d.fillStyle = 'black';
-            fs = 0.15 * scale
             paddingfactor = padding / 2 + lc * ls * scale;
-            cvs2d.font = fs + 'px Arial';
-            cvs2d.textAlign = 'center';
             for (x = 0; x <= lc; x++) {
                 point.x = x * ls * scale;
                 point.y = x * ls * scale;
@@ -218,15 +239,18 @@
                 py = padding / 2 + point.y;
                 cvs2d.moveTo(px, padding / 2)
                 cvs2d.lineTo(px, paddingfactor);
-
                 cvs2d.moveTo(padding / 2, py)
                 cvs2d.lineTo(paddingfactor, py);
             }
             cvs2d.stroke();
             cvs2d.closePath();
             cvs2d.beginPath();
-            cvs2d.strokeStyle = 'black';
-            cvs2d.lineWidth = 1;
+            fs = 0.15 * scale
+            cvs2d.font = fs + 'px Arial';
+            cvs2d.textAlign = 'center';
+            cvs2d.textBaseline = 'middle';
+            cvs2d.strokeStyle = '#37474F';
+            cvs2d.lineWidth = 2;
             for (x = 0; x <= lc; x++) {
                 point.x = x * ls * scale;
                 point.y = x * ls * scale;
@@ -236,21 +260,21 @@
                     cvs2d.fillText('0', px, paddingfactor + fs * 1.1);
                     cvs2d.moveTo(px, paddingfactor - 0.05 * scale)
                     cvs2d.lineTo(px, paddingfactor + 0.05 * scale);
-                    cvs2d.fillText('0', paddingfactor + fs * 1.1, py + fs / 4);
+                    cvs2d.fillText('0', paddingfactor + fs * 1.1, py);
                     cvs2d.moveTo(paddingfactor - 0.05 * scale, py)
                     cvs2d.lineTo(paddingfactor + 0.05 * scale, py);
-                } else if (x == Math.ceil(lc / 8)) {
+                } else if (x == Math.ceil(lc / 2 - cirlcesize)) {
                     cvs2d.fillText('– 1', px, paddingfactor + fs * 1.1);
                     cvs2d.moveTo(px, paddingfactor - 0.05 * scale)
                     cvs2d.lineTo(px, paddingfactor + 0.05 * scale);
-                    cvs2d.fillText('1', paddingfactor + fs * 1.1, py + fs / 4);
+                    cvs2d.fillText('1', paddingfactor + fs * 1.1, py);
                     cvs2d.moveTo(paddingfactor - 0.05 * scale, py)
                     cvs2d.lineTo(paddingfactor + 0.05 * scale, py);
-                } else if (x == Math.ceil(lc / (lc / 28))) {
+                } else if (x == Math.ceil(lc / 2 + cirlcesize)) {
                     cvs2d.fillText('1', px, paddingfactor + fs * 1.1);
                     cvs2d.moveTo(px, paddingfactor - 0.05 * scale)
                     cvs2d.lineTo(px, paddingfactor + 0.05 * scale);
-                    cvs2d.fillText('– 1', paddingfactor + fs * 1.1, py + fs / 4);
+                    cvs2d.fillText('– 1', paddingfactor + fs * 1.1, py);
                     cvs2d.moveTo(paddingfactor - 0.05 * scale, py)
                     cvs2d.lineTo(paddingfactor + 0.05 * scale, py);
                 }
@@ -258,13 +282,14 @@
             cvs2d.stroke();
             cvs2d.closePath();
             cvs2d.beginPath();
-            cvs2d.strokeStyle = 'black';
-            cvs2d.lineWidth = 2;
-            cvs2d.arc(padding / 2 + lc * ls * scale / 2, padding / 2 + lc * ls * scale / 2, 12 * ls * scale, 0, Math.PI * 2, true);
+            cvs2d.strokeStyle = '#37474F';
+            cvs2d.lineWidth = 3;
+            cvs2d.arc(padding / 2 + lc * ls * scale / 2, padding / 2 + lc * ls * scale / 2, cirlcesize * ls * scale, 0, Math.PI * 2, true);
             cvs2d.stroke();
             cvs2d.closePath();
             image = new Image();
             image.src = cvs.toDataURL('image/png');
+            image.px = image.py = 0;
             return image;
         }
 
@@ -283,9 +308,9 @@
             padding = Math.ceil(scale / 1.522);
             graph = drawGraph(linenumber, linespacing);
             infobar = drawInfoBar();
-            center.x = graphx + graph.width / 2;
-            center.y = graphy + graph.height / 2;
-            draw();
+            center.x = graph.px + graph.width / 2;
+            center.y = graph.py + graph.height / 2;
+            //draw();
         }
 
         function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
