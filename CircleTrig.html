@@ -2,11 +2,9 @@
 
 <head>
     <title>Circle Trig</title>
+    <meta charset="utf-8">
     <meta http-equiv="content-type" content="text/html; charset=UTF8">
     <meta name="viewport" content="user-scalable=no">
-
-    <body style="background-color:white;">
-    </body>
     <style>
         canvas {
             position: absolute;
@@ -23,9 +21,9 @@
         scale = 0;
         scaleFactor = 7.12;
         graph = undefined;
-        angle = 0;
-        anglez = 0;
-        oldangle = 1;
+        degrees = 0;
+        radian_old = 0;
+        degrees_old = 1;
         radian = 0;
         drag = infobar = undefined;
         isDragging = false;
@@ -63,7 +61,7 @@
                 dragtolerance = ballR * 2;
                 if (e.clientX <= point.x + dragtolerance * scale && e.clientX >= point.x - dragtolerance * scale && e.clientY <= point.y + dragtolerance * scale && e.clientY >= point.y - dragtolerance * scale) {
                     ballR = 0.11;
-                } else {
+                } else if (!isDragging) {
                     ballR = 0.1;
                 }
                 mouse.x = e.clientX;
@@ -120,29 +118,30 @@
         function dragging() {
             rot = Math.atan2(mouse.y - center.y, mouse.x - center.x);
             radian = -rot;
-            angle = radian * todegree;
-            if (angle < 90 + snappadding && angle > 90 - snappadding)
-                angle = 90;
-            else if (angle < snappadding && angle > -snappadding)
-                angle = 0;
-            else if (angle < -90 + snappadding && angle > -90 - snappadding)
-                angle = -90;
-            else if (Math.abs(angle) < 180 + snappadding && Math.abs(angle) > 180 - snappadding)
-                angle = 180;
-            else if (angle < 45 + snappadding && angle > 45 - snappadding)
-                angle = 45;
-            else if (angle < snappadding && angle > -snappadding)
-                angle = 0;
-            else if (angle < -45 + snappadding && angle > -45 - snappadding)
-                angle = -45;
-            else if (angle < -135 + snappadding && angle > -135 - snappadding)
-                angle = -135;
-            else if (angle < 135 + snappadding && angle > 135 - snappadding)
-                angle = 135;
-            radian = -angle * toradian;
-            dot = Math.cos(anglez) * Math.cos(radian) + Math.sin(anglez) * Math.sin(radian);
-            perp = -Math.sin(anglez) * Math.cos(radian) + Math.cos(anglez) * Math.sin(radian);
-            anglez = radian;
+            degrees = radian * todegree;
+            degrees_old = degrees;
+            if (degrees < 90 + snappadding && degrees > 90 - snappadding)
+                degrees = 90;
+            else if (degrees < snappadding && degrees > -snappadding)
+                degrees = 0;
+            else if (degrees < -90 + snappadding && degrees > -90 - snappadding)
+                degrees = -90;
+            else if (Math.abs(degrees) < 180 + snappadding && Math.abs(degrees) > 180 - snappadding)
+                degrees = 180;
+            else if (degrees < 45 + snappadding && degrees > 45 - snappadding)
+                degrees = 45;
+            else if (degrees < snappadding && degrees > -snappadding)
+                degrees = 0;
+            else if (degrees < -45 + snappadding && degrees > -45 - snappadding)
+                degrees = -45;
+            else if (degrees < -135 + snappadding && degrees > -135 - snappadding)
+                degrees = -135;
+            else if (degrees < 135 + snappadding && degrees > 135 - snappadding)
+                degrees = 135;
+            radian = -degrees * toradian;
+            dot = Math.cos(radian_old) * Math.cos(radian) + Math.sin(radian_old) * Math.sin(radian);
+            perp = -Math.sin(radian_old) * Math.cos(radian) + Math.cos(radian_old) * Math.sin(radian);
+            radian_old = radian;
             total_radian -= Math.acos(dot > 1 ? 1 : dot) * (perp >= 0 ? 1 : -1);
             total_degrees = total_radian * todegree;
         }
@@ -158,6 +157,68 @@
             cc.drawImage(infobar, infobar.px, infobar.py);
             drawHandle();
             drawNumbers();
+            drawTrigGraph();
+        }
+
+        function drawTrigGraph() {
+            if (ismobile)
+                return;
+            offsetx = infobar.px + 0.3 * scale;
+            offsety = infobar.py + padding * 6.2 + fs;
+            offsetcos = infobar.py + padding * 6.2 + fs;
+            //graph
+            cc.beginPath();
+            cc.strokeStyle = '#CFD8DC';
+            cc.lineWidth = 1;
+            size = 0.5 * scale;
+            for (x = -radian % 0.314; x < 12.57; x += 0.314) {
+                if (x < 0)
+                    continue;
+                cc.moveTo(offsetx + x * size, offsety + 1 * size);
+                cc.lineTo(offsetx + x * size, offsety + -1 * size);
+                cc.moveTo(offsetx + x * size, offsetcos + 1 * size);
+                cc.lineTo(offsetx + x * size, offsetcos + -1 * size);
+            }
+            cc.stroke();
+            cc.closePath();
+            cc.beginPath();
+            //sin graph
+            cc.beginPath();
+            cc.strokeStyle = '#FFCDD2';
+            cc.lineWidth = 3;
+            size = 0.5 * scale
+            cc.moveTo(offsetx, offsety + trigfunc.sin * size);
+            for (x = 0; x < 12.57; x += 0.01) {
+                cc.lineTo(offsetx + x * size, offsety + Math.sin(x - total_radian) * size);
+            }
+            cc.stroke();
+            cc.closePath();
+            cc.beginPath();
+            cc.strokeStyle = '#29B6F6';
+            cc.fillStyle = '#B3E5FC';
+            cc.lineWidth = 0.035 * scale;
+            cc.arc(offsetx + 3.14 * scale, offsety + trigfunc.sin * size, ballR * scale - 0.035 * scale / 2, Math.PI * 2, 0, true);
+            cc.fill();
+            cc.stroke();
+            //cos graph
+            cc.beginPath();
+            cc.strokeStyle = '#B3E5FC';
+            cc.lineWidth = 3;
+            size = 0.5 * scale
+            cc.moveTo(offsetx, offsetcos + trigfunc.cos * size);
+            for (x = 0; x < 12.57; x += 0.01) {
+                cc.lineTo(offsetx + x * size, offsetcos + Math.cos(x - total_radian) * size);
+            }
+            cc.stroke();
+            cc.closePath();
+            cc.beginPath();
+            cc.strokeStyle = '#29B6F6';
+            cc.fillStyle = '#B3E5FC';
+            cc.lineWidth = 0.035 * scale;
+            cc.arc(offsetx + 3.14 * scale, offsetcos + trigfunc.cos * size, ballR * scale - 0.035 * scale / 2, Math.PI * 2, 0, true);
+            cc.fill();
+            cc.stroke();
+
         }
 
         function drawNumbers() {
@@ -187,6 +248,15 @@
 
         function drawInfoBar() {
             cvs = document.createElement('canvas');
+            image = new Image();
+            if (canvas.width < canvas.height) {
+                image.px = graph.px;
+                image.py = graph.py + graph.height;
+                console.log(image.py);
+            } else {
+                image.px = graph.px + graph.width;
+                image.py = graph.py;
+            }
             cvs.width = graph.width;
             cvs.height = graph.height;
             cvs2d = cvs.getContext('2d');
@@ -196,21 +266,15 @@
             cvs2d.textAlign = 'left';
             cvs2d.fillText('COORDINATES', graph.px + fs, graph.py + padding / 2 + fs);
             cvs2d.fillText('TRIGONOMETRIC FUNCTIONS', graph.px + fs, graph.py + padding * 2.5 + fs);
-            image = new Image();
+            if (!ismobile)
+                cvs2d.fillText('GRAPH', graph.px + fs, graph.py + padding * 5.1 + fs);
             image.src = cvs.toDataURL('image/png');
-            if (canvas.width < canvas.height) {
-                image.px = graph.px;
-                image.py = graph.py + graph.height;
-                console.log(image.py);
-            } else {
-                image.px = graph.px + graph.width;
-                image.py = graph.py;
-            }
+
             return image;
         }
 
         function drawHandle() {
-            rads = angle * toradian;
+            rads = degrees * toradian;
             trigfunc.cos = Math.cos(-rads);
             trigfunc.sin = Math.sin(-rads);
             point.x = (cirlcesize * linespacing * scale) * trigfunc.cos + (center.x)
@@ -241,13 +305,16 @@
             cc.closePath();
             //ball
             cc.beginPath();
-            cc.fillStyle = '#29B6F6';
-            cc.arc(point.x, point.y, ballR * scale, Math.PI * 2, 0, true);
+            cc.lineWidth = 0.035 * scale;
+            cc.strokeStyle = '#29B6F6';
+            cc.fillStyle = '#B3E5FC';
+            cc.arc(point.x, point.y, ballR * scale - 0.035 * scale / 2, Math.PI * 2, 0, true);
             cc.fill();
+            cc.stroke();
             cc.closePath();
             cc.beginPath();
             cc.fillStyle = '#B3E5FC';
-            cc.arc(point.x, point.y, ballR * scale * 0.65, Math.PI * 2, 0, true);
+            //cc.arc(point.x, point.y, ballR * scale * 0.65, Math.PI * 2, 0, true);
             cc.fill();
             cc.closePath();
         }
@@ -398,6 +465,11 @@
             g = parseInt(hexa.slice(3, 5), 16);
             b = parseInt(hexa.slice(5, 7), 16);
             return 'rgba(' + r + ', ' + g + ', ' + b + ', ' + alpha + ')';
+        }
+
+        function lerp(a, b, t) {
+            if (b == a) return;
+            return a + t * (b - a);
         }
     </script>
 
