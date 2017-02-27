@@ -18,108 +18,129 @@
         }
     </style>
     <script>
-        scale = 0;
-        scaleFactor = 7.12;
-        graph = undefined;
-        degrees = 0;
-        radian_old = 0;
-        degrees_old = 1;
-        radian = 0;
-        drag = infobar = undefined;
-        isDragging = false;
-        center = {
+        'use strict';
+        var scale = 0;
+        var scaleFactor = 7.12;
+        var graph = undefined;
+        var degrees = 0;
+        var radian_old = 0;
+        var radian = 0;
+        var drag = undefined;
+        var triggraph = undefined;
+        var infobar = undefined;
+        var isDragging = false;
+        var center = {
             x: 0,
             y: 0
         };
-        mouse = {
+        var mouse = {
             x: 0,
             y: 0
         };
-        point = {
+        var point = {
             x: 0,
             y: 0
         };
-        trigfunc = {
+        var trigfunc = {
             cos: 1,
             sin: 0
         };
-        ballR = 0.1;
-        snappadding = 2;
-        total_radian = 0;
-        total_degrees = 0;
-        linenumber = 26;
-        linespacing = 0.24;
-        cirlcesize = 10;
-        padding = 90;
-        ismobile = false;
-        linewidth = 2
-        todegree = 180 / Math.PI;
-        toradian = Math.PI / 180;
+        var ballR = 0.1;
+        var snappadding = 2;
+        var total_radian = 0;
+        var total_degrees = 0;
+        var old_total_rads = 0;
+        var linenumber = 26;
+        var linespacing = 0.24;
+        var cirlcesize = 10;
+        var padding = 90;
+        var ismobile = false;
+        var linewidth = 2
+        var todegree = 180 / Math.PI;
+        var toradian = Math.PI / 180;
+        var cc = undefined;
+        var c = undefined;
+        var spread = 8.5;
+        var targetspread = 8.5;
+        var offsetx = 0;
+        var offsety = 0;
+        var offsetcos = 0;
+        var padd = 0;
+        var resizing = false;
+        var gbutton = {
+            x: 0,
+            y: 0,
+            width: 0
+        };
         window.onload = function() {
             c = document.getElementById('canvas');
-            c.addEventListener('mousemove', function(e) {
-                dragtolerance = ballR * 2;
-                if (e.clientX <= point.x + dragtolerance * scale && e.clientX >= point.x - dragtolerance * scale && e.clientY <= point.y + dragtolerance * scale && e.clientY >= point.y - dragtolerance * scale) {
-                    ballR = 0.11;
-                } else if (!isDragging) {
-                    ballR = 0.1;
-                }
-                mouse.x = e.clientX;
-                mouse.y = e.clientY;
-            });
-            c.addEventListener('touchmove', function(e) {
-                if (e.touches) e = e.touches[0];
-                mouse.x = e.clientX;
-                mouse.y = e.clientY;
-                return false;
-            }, false);
-            c.addEventListener('mousedown', function(e) {
-                dragtolerance = ballR * 2;
-                if (e.clientX <= point.x + dragtolerance * scale && e.clientX >= point.x - dragtolerance * scale && e.clientY <= point.y + dragtolerance * scale && e.clientY >= point.y - dragtolerance * scale) {
-                    if (!isDragging) {
-                        isDragging = true;
-                        //drag = setInterval(dragging, 1000 / 60);
+            var dragtolerance = ballR * 2;
+            var buttontolerance = gbutton.width * 2;
+            if (ismobile) {
+                c.addEventListener('touchstart', function(e) {
+                    if (e.touches) e = e.touches[0];
+                    if (e.clientX <= point.x + dragtolerance * scale && e.clientX >= point.x - dragtolerance * scale && e.clientY <= point.y + dragtolerance * scale && e.clientY >= point.y - dragtolerance * scale) {
+                        if (!isDragging) {
+                            isDragging = true;
+                        }
                     }
-                }
-            });
-            c.addEventListener('touchstart', function(e) {
-                if (e.touches) e = e.touches[0];
-                dragtolerance = ballR * 2;
-                if (e.clientX <= point.x + dragtolerance * scale && e.clientX >= point.x - dragtolerance * scale && e.clientY <= point.y + dragtolerance * scale && e.clientY >= point.y - dragtolerance * scale) {
-                    if (!isDragging) {
-                        isDragging = true;
-                        //drag = setInterval(dragging, 1000 / 60);
+                    return false;
+                }, false);
+                c.addEventListener('touchend', function(e) {
+                    if (e.touches) e = e.touches[0];
+                    if (isDragging) {
+                        isDragging = false;
                     }
-                }
-                return false;
-            }, false);
-            c.addEventListener('touchend', function(e) {
-                if (e.touches) e = e.touches[0];
-                if (isDragging) {
-                    isDragging = false;
-                    //clearInterval(drag);
-                }
-                return false;
-            }, false);
-            c.addEventListener('mouseup', function(e) {
-                if (isDragging) {
-                    isDragging = false;
-                    //clearInterval(drag);
-                }
-            });
+                    return false;
+                }, false);
+                c.addEventListener('touchmove', function(e) {
+                    if (e.touches) e = e.touches[0];
+                    mouse.x = e.clientX;
+                    mouse.y = e.clientY;
+                    return false;
+                }, false);
+            } else {
+                c.addEventListener('mousemove', function(e) {
+                    mouse.x = e.clientX;
+                    mouse.y = e.clientY;
+                });
+                c.addEventListener('mousedown', function(e) {
+                    buttontolerance = gbutton.width * 2;
+                    console.log(e.clientY, buttontolerance)
+                    if (e.clientX <= gbutton.x + buttontolerance && e.clientX >= gbutton.x - buttontolerance && e.clientY <= gbutton.y + buttontolerance && e.clientY >= gbutton.y - buttontolerance) {
+                        console.log('butto');
+                        if (targetspread == 8.5)
+                            targetspread = 6.5;
+                        else {
+                            targetspread = 8.5;
+                        }
+                    }
+                    if (e.clientX <= point.x + dragtolerance * scale && e.clientX >= point.x - dragtolerance * scale && e.clientY <= point.y + dragtolerance * scale && e.clientY >= point.y - dragtolerance * scale) {
+                        if (!isDragging) {
+                            isDragging = true;
+                        }
+                    }
+                });
+                c.addEventListener('mouseup', function(e) {
+                    if (isDragging) {
+                        isDragging = false;
+                    }
+                });
+            }
             cc = c.getContext('2d');
             cc.imageSmoothingEnabled = true;
             cc.translate(0.5, 0.5);
+            graph = new Image();
+            infobar = new Image();
             window.addEventListener('resize', resizeCanvas, false);
             resizeCanvas();
-            draw();
+            requestAnimationFrame(draw);
         }
 
         function dragging() {
-            rot = Math.atan2(mouse.y - center.y, mouse.x - center.x);
+            var rot = Math.atan2(mouse.y - center.y, mouse.x - center.x);
             radian = -rot;
             degrees = radian * todegree;
-            degrees_old = degrees;
             if (degrees < 90 + snappadding && degrees > 90 - snappadding)
                 degrees = 90;
             else if (degrees < snappadding && degrees > -snappadding)
@@ -139,8 +160,8 @@
             else if (degrees < 135 + snappadding && degrees > 135 - snappadding)
                 degrees = 135;
             radian = -degrees * toradian;
-            dot = Math.cos(radian_old) * Math.cos(radian) + Math.sin(radian_old) * Math.sin(radian);
-            perp = -Math.sin(radian_old) * Math.cos(radian) + Math.cos(radian_old) * Math.sin(radian);
+            var dot = Math.cos(radian_old) * Math.cos(radian) + Math.sin(radian_old) * Math.sin(radian);
+            var perp = -Math.sin(radian_old) * Math.cos(radian) + Math.cos(radian_old) * Math.sin(radian);
             radian_old = radian;
             total_radian -= Math.acos(dot > 1 ? 1 : dot) * (perp >= 0 ? 1 : -1);
             total_degrees = total_radian * todegree;
@@ -148,11 +169,16 @@
 
         function draw(time) {
             requestAnimationFrame(draw);
+            if (!resizing && !isDragging && old_total_rads == total_radian && spread == targetspread)
+                return
+            resizing = false;
+            console.log('test');
+            old_total_rads = lerp(old_total_rads, total_radian, 0.1);
+            spread = lerp(spread, targetspread, 0.1);
             if (isDragging)
                 dragging();
-            cc.fillStyle = '#b6ccff';
             cc.clearRect(0, 0, c.width, c.height);
-            size = 0.3 * scale;
+            var size = 0.3 * scale;
             cc.drawImage(graph, graph.px, graph.py);
             cc.drawImage(infobar, infobar.px, infobar.py);
             drawHandle();
@@ -163,15 +189,21 @@
         function drawTrigGraph() {
             if (ismobile)
                 return;
-            offsetx = infobar.px + 0.3 * scale;
-            offsety = infobar.py + padding * 6.2 + fs;
-            offsetcos = infobar.py + padding * 6.2 + fs;
+            offsetx = infobar.px + 0.35 * scale;
+            offsety = infobar.py + padding * 6.5;
+            offsetcos = padding * spread;
+            trigfunc.cos = Math.cos(old_total_rads);
+            trigfunc.sin = Math.sin(old_total_rads);
+            gbutton.x = infobar.px + 1.5 * scale;
+            gbutton.y = infobar.py + padding * 5.15;
+            cc.rect(gbutton.x, gbutton.y, gbutton.width, gbutton.width)
+            cc.fill();
             //graph
             cc.beginPath();
             cc.strokeStyle = '#CFD8DC';
             cc.lineWidth = 1;
-            size = 0.5 * scale;
-            for (x = -radian % 0.314; x < 12.57; x += 0.314) {
+            var size = 0.5 * scale;
+            for (var x = old_total_rads % 0.314; x < 12.57; x += 0.314) {
                 if (x < 0)
                     continue;
                 cc.moveTo(offsetx + x * size, offsety + 1 * size);
@@ -187,9 +219,9 @@
             cc.strokeStyle = '#FFCDD2';
             cc.lineWidth = 3;
             size = 0.5 * scale
-            cc.moveTo(offsetx, offsety + trigfunc.sin * size);
-            for (x = 0; x < 12.57; x += 0.01) {
-                cc.lineTo(offsetx + x * size, offsety + Math.sin(x - total_radian) * size);
+            cc.moveTo(offsetx, offsety - trigfunc.sin * size);
+            for (var x = 0; x < 12.57; x += 0.01) {
+                cc.lineTo(offsetx + x * size, offsety + Math.sin(x - old_total_rads) * size);
             }
             cc.stroke();
             cc.closePath();
@@ -197,17 +229,16 @@
             cc.strokeStyle = '#29B6F6';
             cc.fillStyle = '#B3E5FC';
             cc.lineWidth = 0.035 * scale;
-            cc.arc(offsetx + 3.14 * scale, offsety + trigfunc.sin * size, ballR * scale - 0.035 * scale / 2, Math.PI * 2, 0, true);
+            cc.arc(offsetx + 3.14 * scale, offsety + Math.sin(-old_total_rads) * size, ballR * scale - 0.035 * scale / 2, Math.PI * 2, 0, true);
             cc.fill();
             cc.stroke();
             //cos graph
             cc.beginPath();
             cc.strokeStyle = '#B3E5FC';
             cc.lineWidth = 3;
-            size = 0.5 * scale
             cc.moveTo(offsetx, offsetcos + trigfunc.cos * size);
-            for (x = 0; x < 12.57; x += 0.01) {
-                cc.lineTo(offsetx + x * size, offsetcos + Math.cos(x - total_radian) * size);
+            for (var x = 0; x < 12.57; x += 0.01) {
+                cc.lineTo(offsetx + x * size, offsetcos + Math.cos(x - old_total_rads) * size);
             }
             cc.stroke();
             cc.closePath();
@@ -218,15 +249,14 @@
             cc.arc(offsetx + 3.14 * scale, offsetcos + trigfunc.cos * size, ballR * scale - 0.035 * scale / 2, Math.PI * 2, 0, true);
             cc.fill();
             cc.stroke();
-
         }
 
         function drawNumbers() {
-            cos = toEmDash((Math.round(trigfunc.cos * 100) / 100).toFixed(2));
-            sin = toEmDash((Math.round(trigfunc.sin * 100) / -100).toFixed(2));
-            tdegree = toEmDash((Math.round(total_degrees * 100) / 100).toFixed(2));
-            trads = toEmDash((Math.round(total_radian * 100) / 100).toFixed(2));
-            fs = 0.25 * scale;
+            var cos = toEmDash((Math.round(trigfunc.cos * 100) / 100).toFixed(2));
+            var sin = toEmDash((Math.round(trigfunc.sin * 100) / -100).toFixed(2));
+            var tdegree = toEmDash((Math.round(total_degrees * 100) / 100).toFixed(2));
+            var trads = toEmDash((Math.round(total_radian * 100) / 100).toFixed(2));
+            var fs = 0.25 * scale;
             cc.fillStyle = '#B3E5FC';
             cc.font = fs + 'px Arial black';
             cc.textAlign = 'left';
@@ -242,55 +272,44 @@
             cc.fillText('cos( ' + tdegree + '° ) = ' + cos, infobar.px + fs * 1.3, infobar.py + padding + fs * 6.5);
             cc.fillText('cos( ' + trads + ' ) = ' + cos, infobar.px + fs * 1.3, infobar.py + padding + fs * 7.7);
             cc.fillStyle = '#FFCDD2';
-            cc.fillText('sin( ' + tdegree + '° ) = ' + sin, infobar.px + fs * 1.3, infobar.py + padding + fs * 9.1);
-            cc.fillText('sin( ' + trads + ' ) = ' + sin, infobar.px + fs * 1.3, infobar.py + padding + fs * 10.3);
+            cc.fillText('sin( ' + tdegree + '° ) = ' + sin, infobar.px + fs * 1.3, infobar.py + padding + fs * 8.9);
+            cc.fillText('sin( ' + trads + ' ) = ' + sin, infobar.px + fs * 1.3, infobar.py + padding + fs * 10.1);
         }
 
         function drawInfoBar() {
-            cvs = document.createElement('canvas');
-            image = new Image();
-            if (canvas.width < canvas.height) {
-                image.px = graph.px;
-                image.py = graph.py + graph.height;
-                console.log(image.py);
-            } else {
-                image.px = graph.px + graph.width;
-                image.py = graph.py;
+            infobar.width = graph.width;
+            infobar.height = graph.height;
+            cc.fillStyle = '#29B6F6';
+            var fs = 0.3 * scale;
+            cc.font = fs + 'px Arial black';
+            cc.textAlign = 'left';
+            cc.fillText('COORDINATES', graph.px + fs, graph.py + padding / 2 + fs);
+            cc.fillText('TRIGONOMETRIC FUNCTIONS', graph.px + fs, graph.py + padding * 2.5 + fs);
+            if (!ismobile) {
+                cc.fillText('GRAPH', graph.px + fs, graph.py + padding * 5 + fs);
             }
-            cvs.width = graph.width;
-            cvs.height = graph.height;
-            cvs2d = cvs.getContext('2d');
-            cvs2d.fillStyle = '#29B6F6';
-            fs = 0.3 * scale;
-            cvs2d.font = fs + 'px Arial black';
-            cvs2d.textAlign = 'left';
-            cvs2d.fillText('COORDINATES', graph.px + fs, graph.py + padding / 2 + fs);
-            cvs2d.fillText('TRIGONOMETRIC FUNCTIONS', graph.px + fs, graph.py + padding * 2.5 + fs);
-            if (!ismobile)
-                cvs2d.fillText('GRAPH', graph.px + fs, graph.py + padding * 5.1 + fs);
-            image.src = cvs.toDataURL('image/png');
-
-            return image;
+            if (canvas.width < canvas.height) {
+                infobar.px = graph.px;
+                infobar.py = graph.py + graph.height;
+            } else {
+                infobar.px = graph.px + graph.width;
+                infobar.py = graph.py;
+            }
+            infobar.src = c.toDataURL('image/png');
+            cc.clearRect(0, 0, c.width, c.height);
         }
 
         function drawHandle() {
-            rads = degrees * toradian;
-            trigfunc.cos = Math.cos(-rads);
-            trigfunc.sin = Math.sin(-rads);
+            trigfunc.cos = Math.cos(radian);
+            trigfunc.sin = Math.sin(radian);
             point.x = (cirlcesize * linespacing * scale) * trigfunc.cos + (center.x)
             point.y = (cirlcesize * linespacing * scale) * trigfunc.sin + (center.y);
-            padd = linenumber * linespacing * scale;
             //cross line
             cc.beginPath();
             cc.strokeStyle = hex2rgba('#76FF03', 0.8);
-            //cc.strokeStyle = hex2rgba('#00B0FF', 0.5);
             cc.lineWidth = 3;
             cc.moveTo(point.x, graph.py + padding / 2);
             cc.lineTo(point.x, graph.py + padding / 2 + padd);
-            //cc.stroke();
-            //cc.closePath();
-            //cc.beginPath();
-            //cc.strokeStyle = hex2rgba('#FF1744', 0.5);
             cc.moveTo(graph.px + padding / 2, point.y);
             cc.lineTo(graph.px + padding / 2 + padd, point.y);
             cc.stroke();
@@ -320,72 +339,72 @@
         }
 
         function drawGraph(lc, ls) {
-            cvs = document.createElement('canvas');
-            cvs.width = cvs.height = (lc * ls * scale + 1 + padding);
-            cvs2d = cvs.getContext('2d');
-            cvs2d.beginPath();
-            cvs2d.strokeStyle = '#CFD8DC';
-            cvs2d.lineWidth = 1;
-            paddingfactor = padding / 2 + lc * ls * scale;
-            for (x = 0; x <= lc; x++) {
+            var px = 0;
+            var py = 0;
+            cc.beginPath();
+            cc.strokeStyle = '#CFD8DC';
+            cc.lineWidth = 1;
+            var paddingfactor = padding / 2 + lc * ls * scale;
+            for (var x = 0; x <= lc; x++) {
                 point.x = x * ls * scale;
                 point.y = x * ls * scale;
                 px = padding / 2 + point.x;
                 py = padding / 2 + point.y;
-                cvs2d.moveTo(px, padding / 2)
-                cvs2d.lineTo(px, paddingfactor);
-                cvs2d.moveTo(padding / 2, py)
-                cvs2d.lineTo(paddingfactor, py);
+                cc.moveTo(px, padding / 2)
+                cc.lineTo(px, paddingfactor);
+                cc.moveTo(padding / 2, py)
+                cc.lineTo(paddingfactor, py);
             }
-            cvs2d.stroke();
-            cvs2d.closePath();
-            cvs2d.beginPath();
-            fs = 0.15 * scale
-            cvs2d.font = fs + 'px Arial';
-            cvs2d.textAlign = 'center';
-            cvs2d.textBaseline = 'middle';
-            cvs2d.strokeStyle = '#37474F';
-            cvs2d.lineWidth = 2;
-            for (x = 0; x <= lc; x++) {
+            cc.stroke();
+            cc.closePath();
+            cc.beginPath();
+            var fs = 0.15 * scale
+            cc.font = fs + 'px Arial';
+            cc.textAlign = 'center';
+            cc.textBaseline = 'middle';
+            cc.strokeStyle = '#37474F';
+            cc.lineWidth = 2;
+            for (var x = 0; x <= lc; x++) {
                 point.x = x * ls * scale;
                 point.y = x * ls * scale;
                 px = padding / 2 + point.x;
                 py = padding / 2 + point.y;
                 if (x == Math.ceil(lc / 2)) {
-                    cvs2d.fillText('0', px, paddingfactor + fs * 1.1);
-                    cvs2d.moveTo(px, paddingfactor - 0.05 * scale)
-                    cvs2d.lineTo(px, paddingfactor + 0.05 * scale);
-                    cvs2d.fillText('0', paddingfactor + fs * 1.1, py);
-                    cvs2d.moveTo(paddingfactor - 0.05 * scale, py)
-                    cvs2d.lineTo(paddingfactor + 0.05 * scale, py);
+                    cc.fillText('0', px, paddingfactor + fs * 1.1);
+                    cc.moveTo(px, paddingfactor - 0.05 * scale)
+                    cc.lineTo(px, paddingfactor + 0.05 * scale);
+                    cc.fillText('0', paddingfactor + fs * 1.1, py);
+                    cc.moveTo(paddingfactor - 0.05 * scale, py)
+                    cc.lineTo(paddingfactor + 0.05 * scale, py);
                 } else if (x == Math.ceil(lc / 2 - cirlcesize)) {
-                    cvs2d.fillText('– 1', px, paddingfactor + fs * 1.1);
-                    cvs2d.moveTo(px, paddingfactor - 0.05 * scale)
-                    cvs2d.lineTo(px, paddingfactor + 0.05 * scale);
-                    cvs2d.fillText('1', paddingfactor + fs * 1.1, py);
-                    cvs2d.moveTo(paddingfactor - 0.05 * scale, py)
-                    cvs2d.lineTo(paddingfactor + 0.05 * scale, py);
+                    cc.fillText('– 1', px, paddingfactor + fs * 1.1);
+                    cc.moveTo(px, paddingfactor - 0.05 * scale)
+                    cc.lineTo(px, paddingfactor + 0.05 * scale);
+                    cc.fillText('1', paddingfactor + fs * 1.1, py);
+                    cc.moveTo(paddingfactor - 0.05 * scale, py)
+                    cc.lineTo(paddingfactor + 0.05 * scale, py);
                 } else if (x == Math.ceil(lc / 2 + cirlcesize)) {
-                    cvs2d.fillText('1', px, paddingfactor + fs * 1.1);
-                    cvs2d.moveTo(px, paddingfactor - 0.05 * scale)
-                    cvs2d.lineTo(px, paddingfactor + 0.05 * scale);
-                    cvs2d.fillText('– 1', paddingfactor + fs * 1.1, py);
-                    cvs2d.moveTo(paddingfactor - 0.05 * scale, py)
-                    cvs2d.lineTo(paddingfactor + 0.05 * scale, py);
+                    cc.fillText('1', px, paddingfactor + fs * 1.1);
+                    cc.moveTo(px, paddingfactor - 0.05 * scale)
+                    cc.lineTo(px, paddingfactor + 0.05 * scale);
+                    cc.fillText('– 1', paddingfactor + fs * 1.1, py);
+                    cc.moveTo(paddingfactor - 0.05 * scale, py)
+                    cc.lineTo(paddingfactor + 0.05 * scale, py);
                 }
             }
-            cvs2d.stroke();
-            cvs2d.closePath();
-            cvs2d.beginPath();
-            cvs2d.strokeStyle = '#37474F';
-            cvs2d.lineWidth = 3;
-            cvs2d.arc(padding / 2 + lc * ls * scale / 2, padding / 2 + lc * ls * scale / 2, cirlcesize * ls * scale, 0, Math.PI * 2, true);
-            cvs2d.stroke();
-            cvs2d.closePath();
-            image = new Image();
-            image.src = cvs.toDataURL('image/png');
-            image.px = image.py = 0;
-            return image;
+            cc.stroke();
+            cc.closePath();
+            cc.beginPath();
+            cc.strokeStyle = '#37474F';
+            cc.lineWidth = 3;
+            cc.arc(padding / 2 + lc * ls * scale / 2, padding / 2 + lc * ls * scale / 2, cirlcesize * ls * scale, 0, Math.PI * 2, true);
+            cc.stroke();
+            cc.closePath();
+            //graph.src = c.toDataURL('image/png');
+            graph.px = graph.py = 0;
+            graph.width = graph.height = (lc * ls * scale + 1 + padding);
+            graph.src = c.toDataURL('image/png');
+            cc.clearRect(0, 0, c.width, c.height);
         }
 
         function resizeCanvas() {
@@ -401,11 +420,14 @@
             canvas.style.width = canvas.width + 'px';
             canvas.style.height = canvas.height + 'px';
             padding = Math.ceil(scale / 1.522);
-            graph = drawGraph(linenumber, linespacing);
-            infobar = drawInfoBar();
+            drawGraph(linenumber, linespacing);
+            drawInfoBar();
             center.x = graph.px + graph.width / 2;
             center.y = graph.py + graph.height / 2;
-            //draw();
+            gbutton.width = 0.2 * scale;
+            padd = linenumber * linespacing * scale;
+            triggraph = drawTrigGraph();
+            resizing = true;
         }
 
         function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
@@ -462,13 +484,14 @@
 
         function hex2rgba(hexa, alpha) {
             var r = parseInt(hexa.slice(1, 3), 16);
-            g = parseInt(hexa.slice(3, 5), 16);
-            b = parseInt(hexa.slice(5, 7), 16);
+            var g = parseInt(hexa.slice(3, 5), 16);
+            var b = parseInt(hexa.slice(5, 7), 16);
             return 'rgba(' + r + ', ' + g + ', ' + b + ', ' + alpha + ')';
         }
 
         function lerp(a, b, t) {
-            if (b == a) return;
+            if (a == b || Math.abs(a - b) < 0.01)
+                return b;
             return a + t * (b - a);
         }
     </script>
