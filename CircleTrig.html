@@ -2,7 +2,6 @@
 
 <head>
     <title>Circle Trig</title>
-    By Anton Kuperman. version 0.1.9.
     <meta charset="utf-8">
     <meta http-equiv="content-type" content="text/html; charset=UTF8">
     <meta name="viewport" content="user-scalable=no">
@@ -20,6 +19,7 @@
     </style>
     <script>
         'use strict';
+        var version = '0.2.2';
         var scale = 0;
         var scaleFactor = 7.12;
         var graph = undefined;
@@ -71,7 +71,8 @@
         var gbutton = {
             x: 0,
             y: 0,
-            width: 0
+            width: 0,
+            height: 0
         };
         window.onload = function() {
             c = document.getElementById('canvas');
@@ -115,6 +116,7 @@
                         else {
                             targetspread = 8.5;
                         }
+                        gbutton.height *= -1;
                     }
                     if (e.clientX <= point.x + dragtolerance * scale && e.clientX >= point.x - dragtolerance * scale && e.clientY <= point.y + dragtolerance * scale && e.clientY >= point.y - dragtolerance * scale) {
                         if (!isDragging) {
@@ -179,12 +181,17 @@
             if (isDragging)
                 dragging();
             cc.clearRect(0, 0, c.width, c.height);
+            cc.fi
+            cc.fillStyle = 'black';
+            cc.font = (0.15 * scale) + 'px Arial';
+            cc.fillText('By Anton Kuperman. version ' + version, 0.1 * scale, 0.1 * scale);
             var size = 0.3 * scale;
             cc.drawImage(graph, graph.px, graph.py);
             cc.drawImage(infobar, infobar.px, infobar.py);
             drawHandle();
             drawNumbers();
             drawTrigGraph();
+            cc.fillStyle = 'black';
         }
 
         function drawTrigGraph() {
@@ -195,26 +202,57 @@
             offsetcos = padding * spread;
             trigfunc.cos = Math.cos(old_total_rads);
             trigfunc.sin = Math.sin(old_total_rads);
-            gbutton.x = infobar.px + 1.5 * scale;
-            gbutton.y = infobar.py + padding * 5.15;
-            cc.rect(gbutton.x, gbutton.y, gbutton.width, gbutton.width)
-            cc.fill();
+            gbutton.x = infobar.px + 1.7 * scale;
+            gbutton.y = infobar.py + padding * 5.45;
+            cc.fillStyle = '#29B6F6';
+            triangle(cc, gbutton.x, gbutton.y, gbutton.width, gbutton.height, true, false);
             //graph
             cc.beginPath();
             cc.strokeStyle = '#CFD8DC';
             cc.lineWidth = 1;
             var size = 0.5 * scale;
+            cc.moveTo(offsetx, offsety + 1 * size);
+            cc.lineTo(offsetx, offsety + -1 * size);
+            cc.moveTo(offsetx + 12.57 * size, offsety + 1 * size);
+            cc.lineTo(offsetx + 12.57 * size, offsety + -1 * size);
+            if (offsety != offsetcos) {
+                cc.moveTo(offsetx, offsetcos + 1 * size);
+                cc.lineTo(offsetx, offsetcos + -1 * size);
+                cc.moveTo(offsetx + 12.57 * size, offsetcos + 1 * size);
+                cc.lineTo(offsetx + 12.57 * size, offsetcos + -1 * size);
+            }
+
             for (var x = old_total_rads % 0.314; x < 12.57; x += 0.314) {
                 if (x < 0)
                     continue;
                 cc.moveTo(offsetx + x * size, offsety + 1 * size);
                 cc.lineTo(offsetx + x * size, offsety + -1 * size);
-                cc.moveTo(offsetx + x * size, offsetcos + 1 * size);
-                cc.lineTo(offsetx + x * size, offsetcos + -1 * size);
+                if (offsety != offsetcos) {
+                    cc.moveTo(offsetx + x * size, offsetcos + 1 * size);
+                    cc.lineTo(offsetx + x * size, offsetcos + -1 * size);
+                }
+            }
+            for (var x = 0; x < 9; x++) {
+                cc.moveTo(offsetx, offsety - size + x * size / 4);
+                cc.lineTo(offsetx + 12.57 * size, offsety - size + x * size / 4);
+                if (offsety != offsetcos) {
+                    cc.moveTo(offsetx, offsetcos - size + x * size / 4);
+                    cc.lineTo(offsetx + 12.57 * size, offsetcos - size + x * size / 4);
+                }
             }
             cc.stroke();
             cc.closePath();
             cc.beginPath();
+            cc.lineWidth = 2;
+            cc.strokeStyle = '#76FF03';
+            cc.moveTo(offsetx, offsety);
+            cc.lineTo(offsetx + 12.57 * size, offsety);
+            if (offsety != offsetcos) {
+                cc.moveTo(offsetx, offsetcos);
+                cc.lineTo(offsetx + 12.57 * size, offsetcos);
+            }
+            cc.stroke();
+            cc.closePath();
             //sin graph
             cc.beginPath();
             cc.strokeStyle = '#FFCDD2';
@@ -261,14 +299,13 @@
             cc.fillStyle = '#B3E5FC';
             cc.font = fs + 'px Arial black';
             cc.textAlign = 'left';
-            cc.fillText('x = ' + cos, infobar.px + fs * 1.3, infobar.py + padding + fs);
-            cc.textAlign = 'right';
+            cc.fillText('x = ' + cos + ' and', infobar.px + fs * 1.3, infobar.py + padding + fs * 1.1);
+            var s = cc.measureText('x = ' + cos).width;
             cc.fillStyle = '#FFCDD2';
-            cc.fillText('y = ' + sin, infobar.px + fs * 10.9, infobar.py + padding + fs);
+            cc.fillText('y = ' + sin, infobar.px + fs * 4.5 + s, infobar.py + padding + fs * 1.1);
             cc.fillStyle = '#CCFF90';
-            cc.textAlign = 'left';
-            cc.fillText('Degrees Measure = ' + tdegree, infobar.px + fs * 1.3, infobar.py + padding + fs * 2.3);
-            cc.fillText('Radians Measure = ' + trads, infobar.px + fs * 1.3, infobar.py + padding + fs * 3.5);
+            cc.fillText('Degree Measure = ' + tdegree, infobar.px + fs * 1.3, infobar.py + padding + fs * 2.3);
+            cc.fillText('Radian Measure = ' + trads, infobar.px + fs * 1.3, infobar.py + padding + fs * 3.5);
             cc.fillStyle = '#B3E5FC';
             cc.fillText('cos( ' + tdegree + '° ) = ' + cos, infobar.px + fs * 1.3, infobar.py + padding + fs * 6.5);
             cc.fillText('cos( ' + trads + ' ) = ' + cos, infobar.px + fs * 1.3, infobar.py + padding + fs * 7.7);
@@ -306,15 +343,16 @@
             point.x = (cirlcesize * linespacing * scale) * trigfunc.cos + (center.x)
             point.y = (cirlcesize * linespacing * scale) * trigfunc.sin + (center.y);
             //cross line
+            /*
             cc.beginPath();
             cc.strokeStyle = hex2rgba('#76FF03', 0.8);
-            cc.lineWidth = 3;
+            cc.lineWidth = 2;
             cc.moveTo(point.x, graph.py + padding / 2);
             cc.lineTo(point.x, graph.py + padding / 2 + padd);
             cc.moveTo(graph.px + padding / 2, point.y);
             cc.lineTo(graph.px + padding / 2 + padd, point.y);
             cc.stroke();
-            cc.closePath();
+            cc.closePath();*/
             //cog
             cc.beginPath();
             cc.strokeStyle = '#29B6F6';
@@ -358,6 +396,17 @@
             }
             cc.stroke();
             cc.closePath();
+            //axis
+            cc.beginPath();
+            cc.strokeStyle = '#76FF03'
+            cc.lineWidth = 2;
+            cc.moveTo((padding + lc * ls * scale) / 2, padding / 2 - 0.05 * scale);
+            cc.lineTo((padding + lc * ls * scale) / 2, paddingfactor + 0.05 * scale)
+            cc.moveTo((padding) / 2 - 0.05 * scale, (padding + lc * ls * scale) / 2);
+            cc.lineTo((padding / 2 + lc * ls * scale) + 0.05 * scale, (padding + lc * ls * scale) / 2)
+            cc.stroke();
+            cc.closePath();
+            //
             cc.beginPath();
             var fs = 0.15 * scale
             cc.font = fs + 'px Arial';
@@ -371,26 +420,26 @@
                 px = padding / 2 + point.x;
                 py = padding / 2 + point.y;
                 if (x == Math.ceil(lc / 2)) {
-                    cc.fillText('0', px, paddingfactor + fs * 1.1);
-                    cc.moveTo(px, paddingfactor - 0.05 * scale)
-                    cc.lineTo(px, paddingfactor + 0.05 * scale);
-                    cc.fillText('0', paddingfactor + fs * 1.1, py);
-                    cc.moveTo(paddingfactor - 0.05 * scale, py)
-                    cc.lineTo(paddingfactor + 0.05 * scale, py);
+                    cc.fillText('y', px, padding / 2 - fs * 1.1);
+                    //cc.moveTo(px, paddingfactor - 0.05 * scale)
+                    //cc.lineTo(px, paddingfactor + 0.05 * scale);
+                    cc.fillText('x', paddingfactor + fs * 1.1, py);
+                    //cc.moveTo(paddingfactor - 0.05 * scale, py)
+                    //cc.lineTo(paddingfactor + 0.05 * scale, py);
                 } else if (x == Math.ceil(lc / 2 - cirlcesize)) {
-                    cc.fillText('– 1', px, paddingfactor + fs * 1.1);
-                    cc.moveTo(px, paddingfactor - 0.05 * scale)
-                    cc.lineTo(px, paddingfactor + 0.05 * scale);
+                    cc.fillText('– 1', px, (paddingfactor + fs * 1.1));
+                    //cc.moveTo(px, paddingfactor - 0.05 * scale)
+                    //cc.lineTo(px, paddingfactor + 0.05 * scale);
                     cc.fillText('1', paddingfactor + fs * 1.1, py);
-                    cc.moveTo(paddingfactor - 0.05 * scale, py)
-                    cc.lineTo(paddingfactor + 0.05 * scale, py);
+                    //cc.moveTo(paddingfactor - 0.05 * scale, py)
+                    //cc.lineTo(paddingfactor + 0.05 * scale, py);
                 } else if (x == Math.ceil(lc / 2 + cirlcesize)) {
-                    cc.fillText('1', px, paddingfactor + fs * 1.1);
-                    cc.moveTo(px, paddingfactor - 0.05 * scale)
-                    cc.lineTo(px, paddingfactor + 0.05 * scale);
+                    cc.fillText('1', px, (paddingfactor + fs * 1.1));
+                    //cc.moveTo(px, paddingfactor - 0.05 * scale)
+                    //cc.lineTo(px, paddingfactor + 0.05 * scale);
                     cc.fillText('– 1', paddingfactor + fs * 1.1, py);
-                    cc.moveTo(paddingfactor - 0.05 * scale, py)
-                    cc.lineTo(paddingfactor + 0.05 * scale, py);
+                    //cc.moveTo(paddingfactor - 0.05 * scale, py)
+                    //cc.lineTo(paddingfactor + 0.05 * scale, py);
                 }
             }
             cc.stroke();
@@ -425,7 +474,8 @@
             drawInfoBar();
             center.x = graph.px + graph.width / 2;
             center.y = graph.py + graph.height / 2;
-            gbutton.width = 0.2 * scale;
+            gbutton.height = 0.2 * scale;
+            gbutton.width = 0.1 * scale;
             padd = linenumber * linespacing * scale;
             triggraph = drawTrigGraph();
             resizing = true;
@@ -494,6 +544,20 @@
             if (a == b || Math.abs(a - b) < 0.01)
                 return b;
             return a + t * (b - a);
+        }
+
+        function triangle(c2d, x, y, width, height, fill, stroke) {
+            c2d.beginPath();
+            c2d.moveTo(x, y - height / 2);
+            c2d.lineTo(x + width, y + height / 2);
+            c2d.lineTo(x - width, y + height / 2);
+            c2d.lineTo(x, y - height / 2);
+            if (fill || fill == undefined)
+                c2d.fill();
+            if (stroke || stroke == undefined)
+                c2d.stroke();
+            c2d.closePath();
+
         }
     </script>
 
