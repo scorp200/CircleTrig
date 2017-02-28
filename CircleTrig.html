@@ -299,7 +299,7 @@
             cc.fillStyle = '#B3E5FC';
             cc.font = fs + 'px Arial black';
             cc.textAlign = 'left';
-            cc.fillText('x = ' + cos + ' and', infobar.px + fs * 1.3, infobar.py + padding + fs * 1.1);
+            cc.fillText('x = ' + cos + '  and', infobar.px + fs * 1.3, infobar.py + padding + fs * 1.1);
             var s = cc.measureText('x = ' + cos).width;
             cc.fillStyle = '#FFCDD2';
             cc.fillText('y = ' + sin, infobar.px + fs * 4.5 + s, infobar.py + padding + fs * 1.1);
@@ -408,10 +408,10 @@
             cc.closePath();
             //
             cc.beginPath();
-            var fs = 0.15 * scale
+            var fs = 0.18 * scale
             cc.font = fs + 'px Arial';
-            cc.textAlign = 'center';
-            cc.textBaseline = 'middle';
+            cc.textAlign = 'right';
+            cc.textBaseline = 'upper';
             cc.strokeStyle = '#37474F';
             cc.lineWidth = 2;
             for (var x = 0; x <= lc; x++) {
@@ -420,28 +420,36 @@
                 px = padding / 2 + point.x;
                 py = padding / 2 + point.y;
                 if (x == Math.ceil(lc / 2)) {
+                  cc.textAlign = 'center';
+                  cc.textBaseline = 'middle';
                     cc.fillText('y', px, padding / 2 - fs * 1.1);
                     //cc.moveTo(px, paddingfactor - 0.05 * scale)
                     //cc.lineTo(px, paddingfactor + 0.05 * scale);
                     cc.fillText('x', paddingfactor + fs * 1.1, py);
                     //cc.moveTo(paddingfactor - 0.05 * scale, py)
                     //cc.lineTo(paddingfactor + 0.05 * scale, py);
+                    cc.textAlign = 'right';
+                    cc.textBaseline = 'upper';
                 } else if (x == Math.ceil(lc / 2 - cirlcesize)) {
-                    cc.fillText('– 1', px, (paddingfactor + fs * 1.1));
+                    cc.fillText('– 1', px - fs, (paddingfactor + fs * 3.5) / 2);
                     //cc.moveTo(px, paddingfactor - 0.05 * scale)
                     //cc.lineTo(px, paddingfactor + 0.05 * scale);
-                    cc.fillText('1', paddingfactor + fs * 1.1, py);
+
+                    cc.fillText('1', (paddingfactor + fs) / 2, py - fs / 2.5);
                     //cc.moveTo(paddingfactor - 0.05 * scale, py)
                     //cc.lineTo(paddingfactor + 0.05 * scale, py);
                 } else if (x == Math.ceil(lc / 2 + cirlcesize)) {
-                    cc.fillText('1', px, (paddingfactor + fs * 1.1));
+                    cc.textAlign = 'left';
+                    cc.fillText('1', px + fs, (paddingfactor + fs * 3.5) / 2);
                     //cc.moveTo(px, paddingfactor - 0.05 * scale)
                     //cc.lineTo(px, paddingfactor + 0.05 * scale);
-                    cc.fillText('– 1', paddingfactor + fs * 1.1, py);
+                    cc.textAlign = 'right';
+                    cc.fillText('– 1', (paddingfactor + fs) / 2, py + fs);
                     //cc.moveTo(paddingfactor - 0.05 * scale, py)
                     //cc.lineTo(paddingfactor + 0.05 * scale, py);
                 }
             }
+            cc.textBaseline = 'middle';
             cc.stroke();
             cc.closePath();
             cc.beginPath();
