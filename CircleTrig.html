@@ -184,6 +184,7 @@
             cc.fi
             cc.fillStyle = 'black';
             cc.font = (0.15 * scale) + 'px Arial';
+            cc.textAlign = 'left';
             cc.fillText('By Anton Kuperman. version ' + version, 0.1 * scale, 0.1 * scale);
             var size = 0.3 * scale;
             cc.drawImage(graph, graph.px, graph.py);
@@ -203,7 +204,7 @@
             trigfunc.cos = Math.cos(old_total_rads);
             trigfunc.sin = Math.sin(old_total_rads);
             gbutton.x = infobar.px + 1.7 * scale;
-            gbutton.y = infobar.py + padding * 5.45;
+            gbutton.y = infobar.py + padding * 5.4;
             cc.fillStyle = '#29B6F6';
             triangle(cc, gbutton.x, gbutton.y, gbutton.width, gbutton.height, true, false);
             //graph
@@ -211,18 +212,19 @@
             cc.strokeStyle = '#CFD8DC';
             cc.lineWidth = 1;
             var size = 0.5 * scale;
+            var range = 12.57;
             cc.moveTo(offsetx, offsety + 1 * size);
             cc.lineTo(offsetx, offsety + -1 * size);
-            cc.moveTo(offsetx + 12.57 * size, offsety + 1 * size);
-            cc.lineTo(offsetx + 12.57 * size, offsety + -1 * size);
+            cc.moveTo(offsetx + range * size, offsety + 1 * size);
+            cc.lineTo(offsetx + range * size, offsety + -1 * size);
             if (offsety != offsetcos) {
                 cc.moveTo(offsetx, offsetcos + 1 * size);
                 cc.lineTo(offsetx, offsetcos + -1 * size);
-                cc.moveTo(offsetx + 12.57 * size, offsetcos + 1 * size);
-                cc.lineTo(offsetx + 12.57 * size, offsetcos + -1 * size);
+                cc.moveTo(offsetx + range * size, offsetcos + 1 * size);
+                cc.lineTo(offsetx + range * size, offsetcos + -1 * size);
             }
 
-            for (var x = old_total_rads % 0.314; x < 12.57; x += 0.314) {
+            for (var x = old_total_rads % 0.314; x < range; x += 0.314) {
                 if (x < 0)
                     continue;
                 cc.moveTo(offsetx + x * size, offsety + 1 * size);
@@ -234,10 +236,10 @@
             }
             for (var x = 0; x < 9; x++) {
                 cc.moveTo(offsetx, offsety - size + x * size / 4);
-                cc.lineTo(offsetx + 12.57 * size, offsety - size + x * size / 4);
+                cc.lineTo(offsetx + range * size, offsety - size + x * size / 4);
                 if (offsety != offsetcos) {
                     cc.moveTo(offsetx, offsetcos - size + x * size / 4);
-                    cc.lineTo(offsetx + 12.57 * size, offsetcos - size + x * size / 4);
+                    cc.lineTo(offsetx + range * size, offsetcos - size + x * size / 4);
                 }
             }
             cc.stroke();
@@ -245,11 +247,18 @@
             cc.beginPath();
             cc.lineWidth = 2;
             cc.strokeStyle = '#76FF03';
+            cc.fillStyle = 'black';
+            var fs = 0.18 * scale
+            cc.font = fs + 'px Arial';
+            cc.textAlign = 'center';
+            cc.textBaseline = 'middle';
             cc.moveTo(offsetx, offsety);
-            cc.lineTo(offsetx + 12.57 * size, offsety);
+            cc.lineTo(offsetx + range * size, offsety);
+            cc.fillText('x', offsetx - fs / 2, offsety);
             if (offsety != offsetcos) {
                 cc.moveTo(offsetx, offsetcos);
-                cc.lineTo(offsetx + 12.57 * size, offsetcos);
+                cc.lineTo(offsetx + range * size, offsetcos);
+                cc.fillText('x', offsetx - fs / 2, offsetcos);
             }
             cc.stroke();
             cc.closePath();
@@ -259,7 +268,7 @@
             cc.lineWidth = 3;
             size = 0.5 * scale
             cc.moveTo(offsetx, offsety - trigfunc.sin * size);
-            for (var x = 0; x < 12.57; x += 0.01) {
+            for (var x = 0; x < range; x += 0.01) {
                 cc.lineTo(offsetx + x * size, offsety + Math.sin(x - old_total_rads) * size);
             }
             cc.stroke();
@@ -276,7 +285,7 @@
             cc.strokeStyle = '#B3E5FC';
             cc.lineWidth = 3;
             cc.moveTo(offsetx, offsetcos + trigfunc.cos * size);
-            for (var x = 0; x < 12.57; x += 0.01) {
+            for (var x = 0; x < range; x += 0.01) {
                 cc.lineTo(offsetx + x * size, offsetcos + Math.cos(x - old_total_rads) * size);
             }
             cc.stroke();
@@ -302,7 +311,7 @@
             cc.fillText('x = ' + cos + '  and', infobar.px + fs * 1.3, infobar.py + padding + fs * 1.1);
             var s = cc.measureText('x = ' + cos).width;
             cc.fillStyle = '#FFCDD2';
-            cc.fillText('y = ' + sin, infobar.px + fs * 4.5 + s, infobar.py + padding + fs * 1.1);
+            cc.fillText('y = ' + sin, infobar.px + fs * 4.6 + s, infobar.py + padding + fs * 1.1);
             cc.fillStyle = '#CCFF90';
             cc.fillText('Degree Measure = ' + tdegree, infobar.px + fs * 1.3, infobar.py + padding + fs * 2.3);
             cc.fillText('Radian Measure = ' + trads, infobar.px + fs * 1.3, infobar.py + padding + fs * 3.5);
@@ -324,7 +333,7 @@
             cc.fillText('COORDINATES', graph.px + fs, graph.py + padding / 2 + fs);
             cc.fillText('TRIGONOMETRIC FUNCTIONS', graph.px + fs, graph.py + padding * 2.5 + fs);
             if (!ismobile) {
-                cc.fillText('GRAPH', graph.px + fs, graph.py + padding * 5 + fs);
+                cc.fillText('GRAPH', graph.px + fs, graph.py + padding * 4.9 + fs);
             }
             if (canvas.width < canvas.height) {
                 infobar.px = graph.px;
@@ -420,8 +429,8 @@
                 px = padding / 2 + point.x;
                 py = padding / 2 + point.y;
                 if (x == Math.ceil(lc / 2)) {
-                  cc.textAlign = 'center';
-                  cc.textBaseline = 'middle';
+                    cc.textAlign = 'center';
+                    cc.textBaseline = 'middle';
                     cc.fillText('y', px, padding / 2 - fs * 1.1);
                     //cc.moveTo(px, paddingfactor - 0.05 * scale)
                     //cc.lineTo(px, paddingfactor + 0.05 * scale);
