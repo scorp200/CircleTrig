@@ -267,7 +267,7 @@
             cc.strokeStyle = '#FFCDD2';
             cc.lineWidth = 3;
             size = 0.5 * scale
-            cc.moveTo(offsetx, offsety + trigfunc.sin * size);
+            cc.moveTo(offsetx, offsety - trigfunc.sin * size);
             for (var x = 0; x < range; x += 0.01) {
                 cc.lineTo(offsetx + x * size, offsety + Math.sin(x + old_total_rads) * size);
             }
