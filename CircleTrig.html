@@ -1,4 +1,4 @@
-<html>
+﻿<html>
 
 <head>
     <title>Circle Trig</title>
@@ -19,7 +19,7 @@
     </style>
     <script>
         'use strict';
-        var version = '0.2.2';
+        var version = '0.2.3';
         var scale = 0;
         var scaleFactor = 7.12;
         var graph = undefined;
@@ -74,12 +74,12 @@
             width: 0,
             height: 0
         };
-        window.onload = function() {
+        window.onload = function () {
             c = document.getElementById('canvas');
             var dragtolerance = ballR * 2;
             var buttontolerance = gbutton.width * 2;
             if (ismobile) {
-                c.addEventListener('touchstart', function(e) {
+                c.addEventListener('touchstart', function (e) {
                     if (e.touches) e = e.touches[0];
                     if (e.clientX <= point.x + dragtolerance * scale && e.clientX >= point.x - dragtolerance * scale && e.clientY <= point.y + dragtolerance * scale && e.clientY >= point.y - dragtolerance * scale) {
                         if (!isDragging) {
@@ -88,25 +88,25 @@
                     }
                     return false;
                 }, false);
-                c.addEventListener('touchend', function(e) {
+                c.addEventListener('touchend', function (e) {
                     if (e.touches) e = e.touches[0];
                     if (isDragging) {
                         isDragging = false;
                     }
                     return false;
                 }, false);
-                c.addEventListener('touchmove', function(e) {
+                c.addEventListener('touchmove', function (e) {
                     if (e.touches) e = e.touches[0];
                     mouse.x = e.clientX;
                     mouse.y = e.clientY;
                     return false;
                 }, false);
             } else {
-                c.addEventListener('mousemove', function(e) {
+                c.addEventListener('mousemove', function (e) {
                     mouse.x = e.clientX;
                     mouse.y = e.clientY;
                 });
-                c.addEventListener('mousedown', function(e) {
+                c.addEventListener('mousedown', function (e) {
                     buttontolerance = gbutton.width * 2;
                     console.log(e.clientY, buttontolerance)
                     if (e.clientX <= gbutton.x + buttontolerance && e.clientX >= gbutton.x - buttontolerance && e.clientY <= gbutton.y + buttontolerance && e.clientY >= gbutton.y - buttontolerance) {
@@ -124,7 +124,7 @@
                         }
                     }
                 });
-                c.addEventListener('mouseup', function(e) {
+                c.addEventListener('mouseup', function (e) {
                     if (isDragging) {
                         isDragging = false;
                     }
@@ -201,8 +201,8 @@
             offsetx = infobar.px + 0.35 * scale;
             offsety = infobar.py + padding * 6.5;
             offsetcos = padding * spread;
-            trigfunc.cos = Math.cos(old_total_rads);
-            trigfunc.sin = Math.sin(old_total_rads);
+            trigfunc.cos = Math.cos(-old_total_rads + 3.14);
+            trigfunc.sin = Math.sin(-old_total_rads);
             gbutton.x = infobar.px + 1.7 * scale;
             gbutton.y = infobar.py + padding * 5.4;
             cc.fillStyle = '#29B6F6';
@@ -224,7 +224,7 @@
                 cc.lineTo(offsetx + range * size, offsetcos + -1 * size);
             }
 
-            for (var x = old_total_rads % 0.314; x < range; x += 0.314) {
+            for (var x = -old_total_rads % 0.314; x < range; x += 0.314) {
                 if (x < 0)
                     continue;
                 cc.moveTo(offsetx + x * size, offsety + 1 * size);
@@ -267,9 +267,9 @@
             cc.strokeStyle = '#FFCDD2';
             cc.lineWidth = 3;
             size = 0.5 * scale
-            cc.moveTo(offsetx, offsety - trigfunc.sin * size);
+            cc.moveTo(offsetx, offsety + trigfunc.sin * size);
             for (var x = 0; x < range; x += 0.01) {
-                cc.lineTo(offsetx + x * size, offsety + Math.sin(x - old_total_rads) * size);
+                cc.lineTo(offsetx + x * size, offsety + Math.sin(x + old_total_rads) * size);
             }
             cc.stroke();
             cc.closePath();
@@ -277,7 +277,7 @@
             cc.strokeStyle = '#29B6F6';
             cc.fillStyle = '#B3E5FC';
             cc.lineWidth = 0.035 * scale;
-            cc.arc(offsetx + 3.14 * scale, offsety + Math.sin(-old_total_rads) * size, ballR * scale - 0.035 * scale / 2, Math.PI * 2, 0, true);
+            cc.arc(offsetx + 3.14 * scale, offsety + Math.sin(old_total_rads) * size, ballR * scale - 0.035 * scale / 2, Math.PI * 2, 0, true);
             cc.fill();
             cc.stroke();
             //cos graph
@@ -286,7 +286,7 @@
             cc.lineWidth = 3;
             cc.moveTo(offsetx, offsetcos + trigfunc.cos * size);
             for (var x = 0; x < range; x += 0.01) {
-                cc.lineTo(offsetx + x * size, offsetcos + Math.cos(x - old_total_rads) * size);
+                cc.lineTo(offsetx + x * size, offsetcos + Math.cos(x + old_total_rads + 3.14) * size);
             }
             cc.stroke();
             cc.closePath();
