@@ -202,7 +202,7 @@
             offsety = infobar.py + padding * 6.5;
             offsetcos = padding * spread;
             trigfunc.cos = Math.cos(-old_total_rads + 3.14);
-            trigfunc.sin = Math.sin(-old_total_rads);
+            trigfunc.sin = Math.sin(-old_total_rads + 3.14);
             gbutton.x = infobar.px + 1.7 * scale;
             gbutton.y = infobar.py + padding * 5.4;
             cc.fillStyle = '#29B6F6';
@@ -269,7 +269,7 @@
             size = 0.5 * scale
             cc.moveTo(offsetx, offsety - trigfunc.sin * size);
             for (var x = 0; x < range; x += 0.01) {
-                cc.lineTo(offsetx + x * size, offsety + Math.sin(x + old_total_rads) * size);
+                cc.lineTo(offsetx + x * size, offsety + Math.sin(x + old_total_rads + 3.14) * size);
             }
             cc.stroke();
             cc.closePath();
@@ -277,7 +277,7 @@
             cc.strokeStyle = '#29B6F6';
             cc.fillStyle = '#B3E5FC';
             cc.lineWidth = 0.035 * scale;
-            cc.arc(offsetx + 3.14 * scale, offsety + Math.sin(old_total_rads) * size, ballR * scale - 0.035 * scale / 2, Math.PI * 2, 0, true);
+            cc.arc(offsetx + 3.14 * scale, offsety + Math.sin(old_total_rads + 3.14) * size, ballR * scale - 0.035 * scale / 2, Math.PI * 2, 0, true);
             cc.fill();
             cc.stroke();
             //cos graph
