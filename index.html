@@ -1,0 +1,25 @@
+<html>
+
+<head>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+
+<body>
+    <div x-data="circle">
+        <canvas id="canvas"></canvas>
+        <div>
+            <span>COORDINATES</span>
+            <span x-text="radians"></span>
+        </div>
+    </div>
+</body>
+<script>
+    document.addEventListener('alpine:init', () => {
+        const c = document.getElementById('canvas');
+        Alpine.data('circle', () => ({
+            radians: 0
+        }));
+    });
+</script>
+
+</html>
